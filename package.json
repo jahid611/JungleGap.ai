@@ -20,15 +20,18 @@
     ]
   },
   "dependencies": {
+    "@vercel/analytics": "latest",
     "class-variance-authority": "0.7.1",
     "clsx": "2.1.1",
     "lucide-react": "0.561.0",
     "next": "16.0.10",
+    "next-themes": "latest",
     "react": "^18.2.0",
     "react-dom": "^18.2.0",
     "react-scripts": "5.0.1",
     "tailwind-merge": "3.4.0",
-    "tailwindcss-animate": "1.0.7"
+    "tailwindcss-animate": "1.0.7",
+    "tw-animate-css": "latest"
   },
   "devDependencies": {
     "@types/node": "25.0.1",
