@@ -1,0 +1,226 @@
+/**
+ * JungleGap.ai - Hextech-Styled Overlay
+ */
+
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+body {
+  background: transparent !important;
+  overflow: hidden;
+  font-family: "Segoe UI", -apple-system, BlinkMacSystemFont, sans-serif;
+}
+
+.overlay {
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  background: transparent;
+}
+
+/* Screen border flash on alert */
+.screen-border {
+  position: absolute;
+  inset: 0;
+  border: 3px solid transparent;
+  pointer-events: none;
+  transition: border-color 0.2s ease, box-shadow 0.2s ease;
+}
+
+.overlay.flashing .screen-border {
+  border-color: #c89b3c;
+  box-shadow: inset 0 0 80px rgba(200, 155, 60, 0.15), inset 0 0 40px rgba(200, 155, 60, 0.1);
+}
+
+/* Alert container */
+.alert-container {
+  position: absolute;
+  top: 24px;
+  left: 50%;
+  transform: translateX(-50%);
+  animation: slideDown 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+@keyframes slideDown {
+  from {
+    opacity: 0;
+    transform: translateX(-50%) translateY(-30px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(-50%) translateY(0);
+  }
+}
+
+/* Alert panel - Hextech style */
+.alert-panel {
+  position: relative;
+  padding: 20px 32px;
+  background: linear-gradient(135deg, rgba(1, 10, 19, 0.95) 0%, rgba(10, 20, 35, 0.95) 50%, rgba(1, 10, 19, 0.95) 100%);
+  border: 2px solid #c89b3c;
+  clip-path: polygon(
+    12px 0,
+    calc(100% - 12px) 0,
+    100% 12px,
+    100% calc(100% - 12px),
+    calc(100% - 12px) 100%,
+    12px 100%,
+    0 calc(100% - 12px),
+    0 12px
+  );
+}
+
+/* Gold glow effect */
+.alert-glow {
+  position: absolute;
+  inset: -20px;
+  background: radial-gradient(ellipse at center, rgba(200, 155, 60, 0.15) 0%, transparent 70%);
+  pointer-events: none;
+  animation: pulse 2s ease-in-out infinite;
+}
+
+@keyframes pulse {
+  0%,
+  100% {
+    opacity: 0.5;
+  }
+  50% {
+    opacity: 1;
+  }
+}
+
+/* Inner border accent */
+.alert-border {
+  position: absolute;
+  inset: 4px;
+  border: 1px solid rgba(200, 155, 60, 0.3);
+  clip-path: polygon(
+    10px 0,
+    calc(100% - 10px) 0,
+    100% 10px,
+    100% calc(100% - 10px),
+    calc(100% - 10px) 100%,
+    10px 100%,
+    0 calc(100% - 10px),
+    0 10px
+  );
+  pointer-events: none;
+}
+
+/* Content layout */
+.alert-content {
+  display: flex;
+  align-items: center;
+  gap: 20px;
+}
+
+.alert-icon {
+  width: 48px;
+  height: 48px;
+  color: #c89b3c;
+  animation: iconPulse 1s ease-in-out infinite alternate;
+}
+
+@keyframes iconPulse {
+  from {
+    transform: scale(1);
+    filter: drop-shadow(0 0 4px rgba(200, 155, 60, 0.5));
+  }
+  to {
+    transform: scale(1.05);
+    filter: drop-shadow(0 0 8px rgba(200, 155, 60, 0.8));
+  }
+}
+
+.alert-icon svg {
+  width: 100%;
+  height: 100%;
+}
+
+.alert-text {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.alert-title {
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 3px;
+  color: #c89b3c;
+  text-transform: uppercase;
+}
+
+.alert-champion {
+  font-size: 26px;
+  font-weight: 700;
+  color: #f0e6d2;
+  text-shadow: 0 0 10px rgba(200, 155, 60, 0.5);
+}
+
+.alert-location {
+  font-size: 16px;
+  font-weight: 500;
+  color: #a09b8c;
+  letter-spacing: 1px;
+}
+
+.alert-confidence {
+  font-size: 11px;
+  color: #5b5a56;
+  margin-top: 2px;
+}
+
+/* Hextech corner accents */
+.corner {
+  position: absolute;
+  width: 16px;
+  height: 16px;
+  border: 2px solid #c89b3c;
+}
+
+.corner-tl {
+  top: -2px;
+  left: -2px;
+  border-right: none;
+  border-bottom: none;
+}
+.corner-tr {
+  top: -2px;
+  right: -2px;
+  border-left: none;
+  border-bottom: none;
+}
+.corner-bl {
+  bottom: -2px;
+  left: -2px;
+  border-right: none;
+  border-top: none;
+}
+.corner-br {
+  bottom: -2px;
+  right: -2px;
+  border-left: none;
+  border-top: none;
+}
+
+/* Connection indicator */
+.connection-dot {
+  position: fixed;
+  bottom: 12px;
+  right: 12px;
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: #ff4444;
+  box-shadow: 0 0 8px rgba(255, 68, 68, 0.5);
+  transition: background 0.3s, box-shadow 0.3s;
+}
+
+.connection-dot.connected {
+  background: #44ff44;
+  box-shadow: 0 0 8px rgba(68, 255, 68, 0.5);
+}
