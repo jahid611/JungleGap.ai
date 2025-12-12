@@ -9,7 +9,7 @@ importers:
   .:
     dependencies:
       '@vercel/analytics':
-        specifier: latest
+        specifier: 1.6.1
         version: 1.6.1(next@16.0.10(@babel/core@7.28.5)(react-dom@18.2.0(react@18.2.0))(react@18.2.0))(react@18.2.0)
       class-variance-authority:
         specifier: 0.7.1
@@ -24,7 +24,7 @@ importers:
         specifier: 16.0.10
         version: 16.0.10(@babel/core@7.28.5)(react-dom@18.2.0(react@18.2.0))(react@18.2.0)
       next-themes:
-        specifier: latest
+        specifier: 0.4.6
         version: 0.4.6(react-dom@18.2.0(react@18.2.0))(react@18.2.0)
       react:
         specifier: ^18.2.0
@@ -42,7 +42,7 @@ importers:
         specifier: 1.0.7
         version: 1.0.7(tailwindcss@4.1.18)
       tw-animate-css:
-        specifier: latest
+        specifier: 1.4.0
         version: 1.4.0
     devDependencies:
       '@types/node':

@@ -1,12 +1,11 @@
 """
 JungleGap.ai - Backend Engine
-WebSocket server with mock vision detection and Riot LCU API integration.
+WebSocket server integrating VisionEngine and Riot LCU API.
 """
 
 import asyncio
 import json
-import random
-import time
+import threading
 from datetime import datetime
 from typing import Optional, Set
 
@@ -14,6 +13,8 @@ import requests
 import urllib3
 import websockets
 from websockets.server import WebSocketServerProtocol
+
+from vision import VisionEngine, Detection
 
 # Disable SSL warnings for Riot's self-signed certificate
 urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
@@ -46,46 +47,30 @@ class RiotLCUClient:
         return self.get_game_time() is not None
 
 
-class MockVisionEngine:
-    """
-    Simulates enemy jungler detection for testing.
-    Sends a fake alert every ~10 seconds.
-    """
-    
-    CHAMPIONS = ["Lee Sin", "Elise", "Graves", "Nidalee", "Viego", "Kha'Zix", "Rek'Sai", "Hecarim", "Jarvan IV", "Vi"]
-    LOCATIONS = ["TOP RIVER", "BOT RIVER", "BLUE TOPSIDE", "BLUE BOTSIDE", "RED TOPSIDE", "RED BOTSIDE", "DRAGON PIT", "BARON PIT"]
-    
-    def __init__(self, interval: float = 10.0):
-        self.interval = interval
-        self._last_alert_time = 0
-    
-    def check_for_detection(self) -> Optional[dict]:
-        """
-        Simulate detection. Returns alert data ~every 10 seconds.
-        """
-        current_time = time.time()
-        
-        if current_time - self._last_alert_time >= self.interval:
-            self._last_alert_time = current_time
-            return {
-                "champion": random.choice(self.CHAMPIONS),
-                "location": random.choice(self.LOCATIONS),
-                "confidence": round(random.uniform(0.75, 0.98), 2)
-            }
-        return None
-
-
 class JungleGapServer:
-    """Main WebSocket server orchestrating all components."""
+    """Main WebSocket server orchestrating Vision Engine and LCU API."""
     
-    def __init__(self, host: str = "localhost", port: int = 8765):
+    def __init__(
+        self, 
+        host: str = "localhost", 
+        port: int = 8765,
+        model_path: Optional[str] = None,
+        use_mock: bool = True
+    ):
         self.host = host
         self.port = port
         self.connected_clients: Set[WebSocketServerProtocol] = set()
         
         self.lcu_client = RiotLCUClient()
-        self.vision_engine = MockVisionEngine(interval=10.0)
+        self.vision_engine = VisionEngine(
+            model_path=model_path,
+            use_mock=use_mock
+        )
+        
+        # Shared state between threads
         self._running = False
+        self._latest_detection: Optional[Detection] = None
+        self._detection_lock = threading.Lock()
 
     async def register(self, websocket: WebSocketServerProtocol):
         self.connected_clients.add(websocket)
@@ -112,25 +97,45 @@ class JungleGapServer:
         finally:
             await self.unregister(websocket)
 
+    def _vision_thread(self):
+        """
+        Background thread running the Vision Engine.
+        Updates _latest_detection when enemy jungler is spotted.
+        """
+        print("[Vision] Thread started")
+        
+        for detection in self.vision_engine.run_loop(fps=10):
+            if not self._running:
+                break
+            
+            with self._detection_lock:
+                self._latest_detection = detection
+        
+        print("[Vision] Thread stopped")
+
     async def main_loop(self):
-        """Main loop: check for detections and broadcast alerts."""
+        """Main async loop: check for detections and broadcast alerts."""
         while self._running:
             # Get game time from Riot API
             game_time = self.lcu_client.get_game_time()
             
-            # Check for mock detection
-            detection = self.vision_engine.check_for_detection()
+            # Check for new detection from vision thread
+            detection = None
+            with self._detection_lock:
+                if self._latest_detection:
+                    detection = self._latest_detection
+                    self._latest_detection = None  # Consume detection
             
             if detection:
                 alert = {
                     "type": "alert",
-                    "champion": detection["champion"],
-                    "location": detection["location"],
-                    "confidence": detection["confidence"],
+                    "champion": detection.champion,
+                    "location": detection.location,
+                    "confidence": detection.confidence,
                     "game_time": game_time,
                     "timestamp": datetime.now().isoformat()
                 }
-                print(f"[ALERT] {detection['champion']} spotted at {detection['location']}")
+                print(f"[ALERT] {detection.champion} spotted at {detection.location} ({detection.confidence:.0%})")
                 await self.broadcast(alert)
             else:
                 # Send heartbeat
@@ -140,15 +145,20 @@ class JungleGapServer:
                     "in_game": game_time is not None
                 })
             
-            await asyncio.sleep(0.5)
+            await asyncio.sleep(0.1)  # 10 updates per second
 
     async def start(self):
         self._running = True
+        
+        # Start Vision Engine in background thread
+        vision_thread = threading.Thread(target=self._vision_thread, daemon=True)
+        vision_thread.start()
+        
         print("=" * 50)
         print("  JungleGap.ai - Backend Engine")
         print("=" * 50)
         print(f"[WS] Server starting on ws://{self.host}:{self.port}")
-        print("[MODE] Mock Vision Engine (alerts every ~10s)")
+        print(f"[MODE] {'Mock Detection' if self.vision_engine.use_mock else 'YOLO Detection'}")
         print("[INFO] Press Ctrl+C to stop")
         print("=" * 50)
         
@@ -160,7 +170,23 @@ class JungleGapServer:
 
 
 def main():
-    server = JungleGapServer()
+    import argparse
+    
+    parser = argparse.ArgumentParser(description="JungleGap.ai Backend")
+    parser.add_argument("--model", type=str, default=None, help="Path to YOLO model (.pt)")
+    parser.add_argument("--mock", action="store_true", help="Use mock detection for testing")
+    parser.add_argument("--port", type=int, default=8765, help="WebSocket port")
+    args = parser.parse_args()
+    
+    # Use mock if no model provided or --mock flag
+    use_mock = args.mock or args.model is None
+    
+    server = JungleGapServer(
+        port=args.port,
+        model_path=args.model,
+        use_mock=use_mock
+    )
+    
     try:
         asyncio.run(server.start())
     except KeyboardInterrupt:

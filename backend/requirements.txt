@@ -1,4 +1,14 @@
+# Core dependencies
 websockets>=12.0
 requests>=2.31.0
 urllib3>=2.0.0
+
+# Vision Engine dependencies
+mss>=9.0.0
+numpy>=1.24.0
+
+# YOLO (optional - comment out if not using real detection)
+ultralytics>=8.0.0
+
+# Build tools
 pyinstaller>=6.0.0

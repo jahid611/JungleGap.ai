@@ -1,26 +1,42 @@
 <svg width="180" height="180" viewBox="0 0 180 180" fill="none" xmlns="http://www.w3.org/2000/svg">
-  <style>
-    @media (prefers-color-scheme: light) {
-      .background { fill: black; }
-      .foreground { fill: white; }
-    }
-    @media (prefers-color-scheme: dark) {
-      .background { fill: white; }
-      .foreground { fill: black; }
-    }
-  </style>
-  <g clip-path="url(#clip0_7960_43945)">
-    <rect class="background" width="180" height="180" rx="37" />
-    <g style="transform: scale(95%); transform-origin: center">
-      <path class="foreground"
-        d="M101.141 53H136.632C151.023 53 162.689 64.6662 162.689 79.0573V112.904H148.112V79.0573C148.112 78.7105 148.098 78.3662 148.072 78.0251L112.581 112.898C112.701 112.902 112.821 112.904 112.941 112.904H148.112V126.672H112.941C98.5504 126.672 86.5638 114.891 86.5638 100.5V66.7434H101.141V100.5C101.141 101.15 101.191 101.792 101.289 102.422L137.56 66.7816C137.255 66.7563 136.945 66.7434 136.632 66.7434H101.141V53Z" />
-      <path class="foreground"
-        d="M65.2926 124.136L14 66.7372H34.6355L64.7495 100.436V66.7372H80.1365V118.47C80.1365 126.278 70.4953 129.958 65.2926 124.136Z" />
-    </g>
-  </g>
+  <!-- JungleGap.ai Hextech-style icon -->
   <defs>
-    <clipPath id="clip0_7960_43945">
-      <rect width="180" height="180" fill="white" />
-    </clipPath>
+    <linearGradient id="hexGold" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#c89b3c"/>
+      <stop offset="50%" style="stop-color:#f0e6d2"/>
+      <stop offset="100%" style="stop-color:#c89b3c"/>
+    </linearGradient>
+    <linearGradient id="hexBg" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#010a13"/>
+      <stop offset="100%" style="stop-color:#0a1428"/>
+    </linearGradient>
   </defs>
+  
+  <!-- Background hexagon -->
+  <polygon 
+    points="90,10 160,50 160,130 90,170 20,130 20,50" 
+    fill="url(#hexBg)" 
+    stroke="url(#hexGold)" 
+    stroke-width="3"
+  />
+  
+  <!-- Inner hexagon border -->
+  <polygon 
+    points="90,25 145,57 145,123 90,155 35,123 35,57" 
+    fill="none" 
+    stroke="#c89b3c" 
+    stroke-width="1" 
+    opacity="0.5"
+  />
+  
+  <!-- Eye symbol (vision/detection) -->
+  <ellipse cx="90" cy="90" rx="35" ry="22" fill="none" stroke="url(#hexGold)" stroke-width="3"/>
+  <circle cx="90" cy="90" r="12" fill="url(#hexGold)"/>
+  <circle cx="90" cy="90" r="5" fill="#010a13"/>
+  
+  <!-- Crosshair marks -->
+  <line x1="90" y1="55" x2="90" y2="65" stroke="#c89b3c" stroke-width="2"/>
+  <line x1="90" y1="115" x2="90" y2="125" stroke="#c89b3c" stroke-width="2"/>
+  <line x1="50" y1="90" x2="60" y2="90" stroke="#c89b3c" stroke-width="2"/>
+  <line x1="120" y1="90" x2="130" y2="90" stroke="#c89b3c" stroke-width="2"/>
 </svg>

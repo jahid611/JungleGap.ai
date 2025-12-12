@@ -6,6 +6,7 @@
 const { app, BrowserWindow, screen } = require("electron")
 const path = require("path")
 const { spawn } = require("child_process")
+const fs = require("fs")
 
 let mainWindow = null
 let pythonProcess = null
@@ -17,22 +18,37 @@ function startPythonBackend() {
   const isDev = !app.isPackaged
 
   let pythonPath
+  let args = []
+
   if (isDev) {
     // Development: run Python script directly
     pythonPath = "python"
     const scriptPath = path.join(__dirname, "..", "backend", "engine.py")
+
+    // Check if script exists
+    if (!fs.existsSync(scriptPath)) {
+      console.error("[Backend] Script not found:", scriptPath)
+      return
+    }
+
     console.log("[Backend] Starting Python script:", scriptPath)
-    pythonProcess = spawn(pythonPath, [scriptPath], {
-      stdio: ["ignore", "pipe", "pipe"],
-    })
+    args = [scriptPath]
   } else {
     // Production: run compiled .exe from extraResources
     pythonPath = path.join(process.resourcesPath, "backend", "engine.exe")
+
+    // Check if exe exists
+    if (!fs.existsSync(pythonPath)) {
+      console.error("[Backend] Executable not found:", pythonPath)
+      return
+    }
+
     console.log("[Backend] Starting compiled backend:", pythonPath)
-    pythonProcess = spawn(pythonPath, [], {
-      stdio: ["ignore", "pipe", "pipe"],
-    })
   }
+
+  pythonProcess = spawn(pythonPath, args, {
+    stdio: ["ignore", "pipe", "pipe"],
+  })
 
   pythonProcess.stdout.on("data", (data) => {
     console.log(`[Python] ${data.toString().trim()}`)
@@ -44,6 +60,11 @@ function startPythonBackend() {
 
   pythonProcess.on("close", (code) => {
     console.log(`[Python] Process exited with code ${code}`)
+    // Auto-restart on crash (unless app is quitting)
+    if (code !== 0 && mainWindow) {
+      console.log("[Python] Restarting in 2 seconds...")
+      setTimeout(startPythonBackend, 2000)
+    }
   })
 
   pythonProcess.on("error", (err) => {
@@ -71,6 +92,7 @@ function createOverlayWindow() {
     focusable: false,
     hasShadow: false,
     webPreferences: {
+      preload: path.join(__dirname, "preload.js"),
       contextIsolation: true,
       nodeIntegration: false,
     },
@@ -87,7 +109,8 @@ function createOverlayWindow() {
   const isDev = !app.isPackaged
   if (isDev) {
     mainWindow.loadURL("http://localhost:3000")
-    // Uncomment to debug: mainWindow.webContents.openDevTools({ mode: 'detach' });
+    // Uncomment to debug:
+    // mainWindow.webContents.openDevTools({ mode: 'detach' });
   } else {
     mainWindow.loadFile(path.join(__dirname, "..", "build", "index.html"))
   }
